@@ -1,0 +1,4 @@
+[
+  { "name": "admin", "privileges": ["products", "categories", "sales", "settings", "inventory"] },
+  { "name": "employee", "privileges": ["products", "sales"] }
+]
