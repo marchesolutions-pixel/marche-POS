@@ -86,4 +86,6 @@ app.all('/api/trpc/:path*', async (c) => {
 
 app.get('/', (c) => c.text('Hono API is running'))
 
+app.get('/api/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }))
+
 export default app

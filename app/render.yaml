@@ -1,0 +1,60 @@
+services:
+  - type: web
+    name: marche-pos
+    runtime: node
+    plan: starter
+    
+    # Build configuration
+    buildCommand: npm run build
+    startCommand: npm start
+    
+    # Environment variables
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: APP_ID
+        value: marche-pos-prod
+      - key: APP_SECRET
+        sync: false
+      - key: DATA_DIR
+        value: /var/data
+      - key: VITE_GOOGLE_CLIENT_ID
+        sync: false
+      - key: VITE_GOOGLE_AUTH_URL
+        value: https://accounts.google.com
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        sync: false
+      - key: VITE_KIMI_AUTH_URL
+        value: https://auth.kimi.com
+      - key: VITE_APP_ID
+        sync: false
+      - key: KIMI_AUTH_URL
+        value: https://auth.kimi.com
+      - key: KIMI_OPEN_URL
+        value: https://open.kimi.com
+      - key: OWNER_UNION_ID
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_REGION
+        value: us-east-1
+      - key: AWS_S3_BUCKET
+        sync: false
+
+    # Disk for persistent data storage
+    disk:
+      name: data
+      mountPath: /var/data
+      sizeGB: 1
+
+    # Health check
+    healthCheckPath: /api/health
+
+    # Auto-deploy on git push
+    autoDeploy: true
