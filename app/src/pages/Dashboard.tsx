@@ -37,7 +37,8 @@ function formatNaira(amount: number) {
 
 export default function Dashboard() {
   const { data: kpi, isLoading } = trpc.dashboard.kpi.useQuery()
-  const { data: paymentMethods } = trpc.dashboard.paymentMethods.useQuery()
+  const { data } = trpc.dashboard.paymentMethods.useQuery()
+  const paymentMethods = (data || []) as { method: string; total: number; count: number }[]
 
   if (isLoading || !kpi) {
     return (

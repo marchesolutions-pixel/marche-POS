@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { Bell, User, AlertTriangle } from 'lucide-react'
@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth'
 export default function Layout() {
   const [showNotifications, setShowNotifications] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const [uptimeSeconds, setUptimeSeconds] = useState(0)
   const notificationsRef = useRef<HTMLDivElement>(null)
   const userRef = useRef<HTMLDivElement>(null)
   const { user, logout } = useAuth()
@@ -15,6 +16,17 @@ export default function Layout() {
 
   const lowStockCount = kpi?.lowStockCount ?? 0
   const alerts = [] as { title: string; description: string }[]
+  const idleTimerRef = useRef<number | null>(null)
+
+  const formatUptime = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600)
+    const minutes = Math.floor((seconds % 3600) / 60)
+    const secs = seconds % 60
+    return [hours, minutes, secs]
+      .map(value => String(value).padStart(2, '0'))
+      .join(':')
+  }
+  const INACTIVITY_TIMEOUT = 10 * 60 * 1000 // 10 minutes
 
   if (lowStockCount > 0) {
     alerts.push({
@@ -22,6 +34,38 @@ export default function Layout() {
       description: 'Review inventory and reorder stock for low items.',
     })
   }
+
+  const resetIdleTimer = useCallback(() => {
+    if (idleTimerRef.current) {
+      window.clearTimeout(idleTimerRef.current)
+    }
+    idleTimerRef.current = window.setTimeout(() => {
+      alert('You have been logged out due to inactivity.')
+      logout()
+    }, INACTIVITY_TIMEOUT)
+  }, [logout])
+
+  useEffect(() => {
+    const interval = window.setInterval(
+      () => setUptimeSeconds(prev => prev + 1),
+      1000,
+    )
+    return () => window.clearInterval(interval)
+  }, [])
+
+  useEffect(() => {
+    resetIdleTimer()
+    const events = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart']
+    const handleActivity = () => resetIdleTimer()
+
+    events.forEach(event => window.addEventListener(event, handleActivity))
+    return () => {
+      events.forEach(event => window.removeEventListener(event, handleActivity))
+      if (idleTimerRef.current) {
+        window.clearTimeout(idleTimerRef.current)
+      }
+    }
+  }, [resetIdleTimer])
 
   useEffect(() => {
     function handleClick(event: MouseEvent) {
@@ -55,7 +99,7 @@ export default function Layout() {
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <div className="relative" ref={notificationsRef}>
+                <div className="relative flex items-center gap-3" ref={notificationsRef}>
                   <button
                     type="button"
                     className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background text-foreground transition hover:bg-primary/5 focus:outline-none focus:ring-2 focus:ring-primary"
@@ -71,6 +115,14 @@ export default function Layout() {
                       <span className="absolute -top-1 -right-1 inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-card" />
                     )}
                   </button>
+                  <div className="hidden flex-col items-end gap-1 text-right sm:flex">
+                    <span className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+                      Uptime
+                    </span>
+                    <span className="rounded-full bg-muted px-2 py-1 text-xs font-medium text-foreground">
+                      {formatUptime(uptimeSeconds)}
+                    </span>
+                  </div>
                   {showNotifications && (
                     <div className="absolute right-0 top-full mt-3 w-80 rounded-xl border border-border bg-card p-4 shadow-xl">
                       <div className="flex items-center justify-between pb-3">

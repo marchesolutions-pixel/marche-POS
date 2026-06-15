@@ -265,13 +265,13 @@ const expenseCategories = [
   { id: 4, name: "Marketing", color: "#8b5cf6" },
 ];
 
-const expenses = [];
+const expenses: any[] = [];
 
-const inventory = [];
+const inventory: any[] = [];
 
-const inventoryMovements = [];
+const inventoryMovements: any[] = [];
 
-const sales = [];
+const sales: any[] = [];
 
 const nextIds = {
   product: products.length + 1,
@@ -1049,6 +1049,7 @@ const appRouter = t.router({
         z.object({
           id: z.number(),
           name: z.string().optional(),
+          email: z.string().optional(),
           password: z.string().optional(),
           role: z.enum(["admin", "employee"]).optional(),
           privileges: z.array(z.string()).optional(),
@@ -1072,6 +1073,11 @@ const appRouter = t.router({
         users[idx] = {
           ...users[idx],
           ...(input.name ? { name: input.name } : {}),
+          ...(input.password
+            ? { passwordHash: hashPassword(input.password) }
+            : {}),
+          ...(input.name ? { name: input.name } : {}),
+          ...(input.email ? { email: input.email } : {}),
           ...(input.password
             ? { passwordHash: hashPassword(input.password) }
             : {}),

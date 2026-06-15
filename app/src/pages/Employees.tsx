@@ -23,7 +23,7 @@ import {
   Mail,
   Phone,
   Building,
-  DollarSign,
+
   Briefcase,
   RefreshCcw,
   Search,
@@ -538,7 +538,10 @@ export default function Employees() {
                         ))}
                       </SelectContent>
                     </Select>
-                    <Select value={editStatus} onValueChange={setEditStatus}>
+                    <Select
+                      value={editStatus}
+                      onValueChange={value => setEditStatus(value as "active" | "inactive")}
+                    >
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Status" />
                       </SelectTrigger>
