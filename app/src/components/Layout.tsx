@@ -5,6 +5,8 @@ import { Bell, User, AlertTriangle } from 'lucide-react'
 import { trpc } from '@/providers/trpc'
 import { useAuth } from '@/hooks/useAuth'
 
+const INACTIVITY_TIMEOUT = 10 * 60 * 1000 // 10 minutes
+
 export default function Layout() {
   const [showNotifications, setShowNotifications] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
