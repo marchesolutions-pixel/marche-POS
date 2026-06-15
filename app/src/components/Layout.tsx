@@ -28,7 +28,6 @@ export default function Layout() {
       .map(value => String(value).padStart(2, '0'))
       .join(':')
   }
-  const INACTIVITY_TIMEOUT = 10 * 60 * 1000 // 10 minutes
 
   if (lowStockCount > 0) {
     alerts.push({
