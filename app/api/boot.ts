@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import { Hono } from 'hono'
-import { serveStatic } from 'hono/bun'
+import { serve } from '@hono/node-server'
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch'
 import { appRouter } from './router'
 import path from 'path'
@@ -122,5 +122,8 @@ app.all('/api/trpc/:path*', async (c) => {
 })
 
 app.get('/api/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }))
+
+const port = Number(process.env.PORT ?? 3000)
+serve({ fetch: app.fetch.bind(app), port })
 
 export default app
