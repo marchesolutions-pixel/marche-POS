@@ -23,12 +23,17 @@ app.use('*', async (c, next) => {
 app.use('/assets/*', async (c, next) => {
   try {
     const url = new URL(c.req.url)
-    const file = await import('fs').then(fs => fs.promises.readFile(
-      path.join(__dirname, 'public', url.pathname.slice(1)),
-      'utf-8'
-    ))
+    const filePath = path.join(__dirname, 'public', url.pathname.slice(1))
+    const file = await import('fs').then(fs => fs.promises.readFile(filePath, 'utf-8'))
+    const ext = path.extname(filePath)
+    const contentType =
+      ext === '.js' ? 'application/javascript' :
+      ext === '.css' ? 'text/css' :
+      ext === '.svg' ? 'image/svg+xml' :
+      'application/octet-stream'
+
     c.header('Cache-Control', 'public, max-age=31536000, immutable')
-    return c.text(file, 200, { 'Content-Type': c.req.header('Accept') || 'application/javascript' })
+    return c.text(file, 200, { 'Content-Type': contentType })
   } catch {
     return await next()
   }
