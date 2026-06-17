@@ -35,6 +35,7 @@ import {
   Banknote,
   ArrowLeftRight,
   Smartphone,
+  Tag,
 } from "lucide-react";
 
 function RolesSection() {
@@ -194,6 +195,78 @@ function RolesSection() {
   );
 }
 
+function CategoriesSection() {
+  const { data: categories, refetch } = trpc.products.categories.useQuery();
+  const utils = trpc.useUtils();
+  const createCategory = trpc.products.createCategory.useMutation();
+  const updateCategory = trpc.products.updateCategory.useMutation();
+  const deleteCategory = trpc.products.deleteCategory.useMutation();
+  const [name, setName] = useState("");
+  const [color, setColor] = useState("#94a3b8");
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editColor, setEditColor] = useState("#94a3b8");
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-3 gap-2">
+        <Input placeholder="Category name" value={name} onChange={e => setName(e.target.value)} />
+        <Input placeholder="Color" value={color} onChange={e => setColor(e.target.value)} />
+        <div className="flex gap-2">
+          <Button onClick={async () => {
+            if (!name) return;
+            await createCategory.mutateAsync({ name, color });
+            await utils.products.categories.invalidate();
+            setName(""); setColor("#94a3b8");
+          }}>Create</Button>
+          <Button variant="outline" onClick={() => { setName(""); setColor("#94a3b8"); }}>Reset</Button>
+        </div>
+      </div>
+
+      <div className="divide-y divide-border">
+        {(categories || []).map((c: any) => (
+          <div key={c.id} className="flex items-center justify-between py-2">
+            {editingId === c.id ? (
+              <div className="w-full">
+                <div className="grid grid-cols-3 gap-2 mb-2">
+                  <Input value={editName} onChange={e => setEditName(e.target.value)} />
+                  <Input value={editColor} onChange={e => setEditColor(e.target.value)} />
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={async () => {
+                      await updateCategory.mutateAsync({ id: c.id, name: editName, color: editColor });
+                      await utils.products.categories.invalidate();
+                      setEditingId(null);
+                    }}>Save</Button>
+                    <Button size="sm" variant="outline" onClick={() => setEditingId(null)}>Cancel</Button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center gap-3">
+                  <div style={{ width: 18, height: 18, backgroundColor: c.color, borderRadius: 4 }} />
+                  <div>
+                    <p className="font-medium">{c.name}</p>
+                    <p className="text-xs text-muted-foreground">{c.color}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button size="sm" variant="outline" onClick={() => { setEditingId(c.id); setEditName(c.name); setEditColor(c.color); }}>Edit</Button>
+                  <Button size="sm" variant="destructive" onClick={async () => {
+                    if (!confirm('Delete category?')) return;
+                    await deleteCategory.mutateAsync({ id: c.id });
+                    await utils.products.categories.invalidate();
+                  }}>Delete</Button>
+                </div>
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function Settings() {
   const { user, logout, login } = useAuth();
   const { theme, setTheme } = useTheme();
@@ -331,6 +404,7 @@ export default function Settings() {
     { key: 'payments', label: 'Payment Methods', Icon: CreditCard },
     { key: 'users', label: 'Users', Icon: User },
     { key: 'branches', label: 'Branches', Icon: Banknote },
+    { key: 'categories', label: 'Categories', Icon: Tag },
     { key: 'roles', label: 'Roles & Privileges', Icon: Shield },
     { key: 'system', label: 'System', Icon: Globe },
     { key: 'account', label: 'Account', Icon: Shield },
@@ -1040,6 +1114,22 @@ export default function Settings() {
             </div>
           </div>
         </CardContent>
+        </Card>
+      )}
+
+      {/* Categories */}
+      {(activeSection === 'all' || activeSection === 'categories') && (
+        <Card id="categories">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Tag className="h-5 w-5 text-primary" />
+              Categories
+            </CardTitle>
+            <CardDescription>Manage product categories</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CategoriesSection />
+          </CardContent>
         </Card>
       )}
 

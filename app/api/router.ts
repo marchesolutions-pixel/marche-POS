@@ -149,12 +149,12 @@ let branches: Branch[] = loadJson("branches.json", [
   },
 ]);
 
-const categories: Category[] = [
+let categories: Category[] = loadJson("categories.json", [
   { id: 1, name: "Electronics", color: "#6366f1" },
   { id: 2, name: "Office Supplies", color: "#22c55e" },
   { id: 3, name: "Furniture", color: "#f59e0b" },
   { id: 4, name: "Food & Beverages", color: "#ef4444" },
-];
+]);
 
 const products: Product[] = [];
 
@@ -613,6 +613,56 @@ const appRouter = t.router({
         });
         return createdProducts;
       }),
+      createCategory: t.procedure
+        .input(
+          z.object({
+            name: z.string(),
+            color: z.string().optional().default("#94a3b8"),
+          })
+        )
+        .mutation(({ input }) => {
+          const id = categories.length ? Math.max(...categories.map(c => c.id)) + 1 : 1;
+          const cat = { id, name: input.name, color: input.color };
+          categories.unshift(cat);
+          try {
+            saveJson("categories.json", categories);
+          } catch (e) {
+            /* ignore */
+          }
+          return cat;
+        }),
+      updateCategory: t.procedure
+        .input(
+          z.object({ id: z.number(), name: z.string().optional(), color: z.string().optional() })
+        )
+        .mutation(({ input }) => {
+          const idx = categories.findIndex(c => c.id === input.id);
+          if (idx === -1) throw new Error("Category not found");
+          categories[idx] = {
+            ...categories[idx],
+            ...(input.name ? { name: input.name } : {}),
+            ...(input.color ? { color: input.color } : {}),
+          };
+          try {
+            saveJson("categories.json", categories);
+          } catch (e) {
+            /* ignore */
+          }
+          return categories[idx];
+        }),
+      deleteCategory: t.procedure
+        .input(z.object({ id: z.number() }))
+        .mutation(({ input }) => {
+          const idx = categories.findIndex(c => c.id === input.id);
+          if (idx === -1) throw new Error("Category not found");
+          const [del] = categories.splice(idx, 1);
+          try {
+            saveJson("categories.json", categories);
+          } catch (e) {
+            /* ignore */
+          }
+          return del;
+        }),
   }),
   branches: t.router({
     list: t.procedure.query(() => branches),

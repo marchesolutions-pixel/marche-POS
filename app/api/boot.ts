@@ -129,6 +129,8 @@ app.all('/api/trpc/:path*', async (c) => {
 app.get('/api/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }))
 
 const port = Number(process.env.PORT ?? 3000)
-serve({ fetch: app.fetch.bind(app), port })
+if (process.env.NODE_ENV === "production") {
+  serve({ fetch: app.fetch.bind(app), port })
+}
 
 export default app

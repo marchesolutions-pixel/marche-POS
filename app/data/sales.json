@@ -1,1 +1,29 @@
-[]
+[
+  {
+    "id": 1,
+    "saleNumber": "S-1001",
+    "customerName": "Walk-in",
+    "status": "completed",
+    "paymentMethod": "transfer",
+    "totalAmount": "12000.00",
+    "subtotal": "12000.00",
+    "taxAmount": "0.00",
+    "discountAmount": "0.00",
+    "paymentStatus": "paid",
+    "createdAt": "2026-06-16T09:40:04.831Z",
+    "branchId": 1,
+    "items": [
+      {
+        "id": "item_2_0",
+        "productId": 1,
+        "productName": "Chiganvy",
+        "sku": "PROD-001",
+        "quantity": 1,
+        "unitPrice": "12000.00",
+        "taxRate": "0.00",
+        "taxAmount": "0.00",
+        "totalAmount": "12000.00"
+      }
+    ]
+  }
+]
